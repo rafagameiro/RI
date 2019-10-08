@@ -38,6 +38,7 @@ class computation:
         i = 1
         self.map_model = 0
         self.precision_model = []
+        self.ap_below = 0
 
         plt.subplot(1, 2, 1)
         for query in cranfield.queries:
@@ -52,22 +53,23 @@ class computation:
                 print('qid =', i, ' AP=', average_precision)
                 print('query: \n', query)
                 print()
-            else:
-                self.map_model = self.map_model + average_precision
-                self.precision_model.append(precision)
-                plt.plot(self.recall, precision, color='silver', alpha=0.1)
+                self.ap_below = self.ap_below + average_precision
+            
+            self.map_model = self.map_model + average_precision
+            self.precision_model.append(precision)
+            plt.plot(self.recall, precision, color='silver', alpha=0.1)
 
             i = i + 1
 
         self.map_model = self.map_model / cranfield.num_queries
+        self.ap_below = (self.ap_below / cranfield.num_queries) * 100
 
     def prec_rec_plot(self):
-        print('MAP =', self.map_model)
 
         mean_precision = np.mean(self.precision_model, axis=0)
         std_precision = np.std(self.precision_model, axis=0)
 
-        plt.subplot(1, 4, 2)
+        plt.subplot(1, 2, 2)
         plt.plot(self.recall, mean_precision, color='b', alpha=1)
         plt.gca().set_aspect('equal', adjustable='box')
         plt.fill_between(self.recall,
@@ -79,4 +81,8 @@ class computation:
         plt.ylim([0.0, 1.0])
         plt.xlim([0.0, 1.0])
         plt.title('Precision-Recall (MAP={0:0.2f})'.format(self.map_model))
+
+        print('MAP =', self.map_model)
+        print('Percentage of AP inferior to 0.05 = ', self.ap_below)
+
         plt.savefig('results/prec-recall.png', dpi=100)

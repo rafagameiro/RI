@@ -40,7 +40,7 @@ class computation:
         self.precision_model = []
         self.ap_below = 0
 
-        plt.subplot(1, 2, 1)
+        plt.figure(1)
         for query in cranfield.queries:
             # Parse the query and compute the document scores
             scores = models.score_lmjm(parser.stemSentence(query))
@@ -54,7 +54,7 @@ class computation:
                 print('query: \n', query)
                 print()
                 self.ap_below = self.ap_below + average_precision
-            
+
             self.map_model = self.map_model + average_precision
             self.precision_model.append(precision)
             plt.plot(self.recall, precision, color='silver', alpha=0.1)
@@ -63,13 +63,18 @@ class computation:
 
         self.map_model = self.map_model / cranfield.num_queries
         self.ap_below = (self.ap_below / cranfield.num_queries) * 100
+        self.min_idf = models.min_idf()
+
+
+
+    #def set_val(self):
 
     def prec_rec_plot(self):
 
         mean_precision = np.mean(self.precision_model, axis=0)
         std_precision = np.std(self.precision_model, axis=0)
 
-        plt.subplot(1, 2, 2)
+        plt.figure(2)
         plt.plot(self.recall, mean_precision, color='b', alpha=1)
         plt.gca().set_aspect('equal', adjustable='box')
         plt.fill_between(self.recall,
@@ -84,5 +89,6 @@ class computation:
 
         print('MAP =', self.map_model)
         print('Percentage of AP inferior to 0.05 = ', self.ap_below)
+        print('Minimum computed IDF = ', self.min_idf)
 
         plt.savefig('results/prec-recall.png', dpi=100)

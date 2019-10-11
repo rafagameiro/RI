@@ -20,14 +20,14 @@ class RetrievalModelsMatrix:
         ## LMD statistics
 
         self.ptmd = np.dot(np.ones((np.size(self.term_doc_freq), 1)), [self.docLen])
-        self.ptmc = self.term_doc_freq / sum(self.term_doc_freq)
+        self.ptmc = self.term_coll_freq / sum(self.term_coll_freq)
 
         self.lmd = (self.tf + new * self.ptmc) / (self.ptmd + new).T
 
         ## LMJM statistics
         smoothing = 0.01
 
-        self.ptmd = self.tf * (1 / (self.ptmd.T + smoothing))
+        self.ptmd = self.tf * (1 / (self.ptmd.T + 0.01))
 
         self.lmjm = lamb * self.ptmd + (1 - lamb) * self.ptmc
 
@@ -54,9 +54,6 @@ class RetrievalModelsMatrix:
         doc_scores = np.prod(self.lmjm ** query_vector, axis=1)
 
         return doc_scores
-
-    def score_bm25(self, query):
-        return 0
 
     def scoreRM3(self, query):
         return 0

@@ -17,6 +17,7 @@ class RetrievalModelsMatrix:
 
         self.docNorms = np.sqrt(np.sum(np.power(self.tfidf, 2), axis=1))
 
+        smoothing = 0.01
         ## LMD statistics
 
         self.ptmd = np.dot(np.ones((np.size(self.term_doc_freq), 1)), [self.docLen])
@@ -25,13 +26,14 @@ class RetrievalModelsMatrix:
         self.lmd = (self.tf + new * self.ptmc) / (self.ptmd + new).T
 
         ## LMJM statistics
-        smoothing = 0.01
 
-        self.ptmd = self.tf * (1 / (self.ptmd.T + 0.01))
+        self.ptmd = self.tf * (1 / (self.ptmd.T + smoothing))
 
         self.lmjm = lamb * self.ptmd + (1 - lamb) * self.ptmc
 
         ## RM3 statistics
+        self.prm3 = []
+
 
     def score_vsm(self, query):
         query_vector = self.vectorizer.transform([query]).toarray()
@@ -46,6 +48,8 @@ class RetrievalModelsMatrix:
 
         doc_scores = np.prod(self.lmd ** query_vector, axis=1)
 
+        #doc_scores = np.sum(np.log(self.lmd) * query_vector, axis=1)
+
         return doc_scores
 
     def score_lmjm(self, query):
@@ -55,8 +59,26 @@ class RetrievalModelsMatrix:
 
         return doc_scores
 
-    def scoreRM3(self, query):
-        return 0
+    def scoreRM3(self, query, limit, alpha):
 
-    def min_idf(self):
-        return min(self.idf)
+        query_vector = self.vectorizer.transform([query]).toarray()
+        doc_scores = self.score_lmjm(query)
+
+        thres = np.sort(doc_scores)[limit]
+
+        top_doc = np.array(doc_scores * (doc_scores > thres))
+
+        ptqmd = np.dot(np.ones((np.size(self.term_doc_freq), 1)), [top_doc])
+
+        prm1 = np.sum(ptqmd.T * self.ptmd, axis=0)
+
+        pwmq = query_vector / np.sum(query_vector, axis=1)
+
+        self.prm3 = (1 - alpha) * pwmq + alpha * prm1
+
+        doc_scores = np.prod(self.lmjm ** self.prm3, axis=1)
+
+        return doc_scores
+
+    def get_rm3(self, ):
+        return self.prm3

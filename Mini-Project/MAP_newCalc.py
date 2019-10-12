@@ -10,7 +10,7 @@ import collectionloaders
 import RetrievalModelsMatrix
 
 
-class MAP_lambCalc:
+class MAP_newCalc:
 
     def __init__(self, bigrams):
 
@@ -33,15 +33,15 @@ class MAP_lambCalc:
         
         index = 0
         self.map_val = []
-        lambs = np.arange(0, 1, 0.1)
-        for lamb in lambs:
-            models = RetrievalModelsMatrix.RetrievalModelsMatrix(tf_cranfield, vectorizer, lamb)
+        news = np.arange(50, 1500, 50)
+        for new in news:
+            models = RetrievalModelsMatrix.RetrievalModelsMatrix(tf_cranfield, vectorizer, 0.5, new)
 
             i = 1
             map_model = 0
             for query in cranfield.queries:
                 # Parse the query and compute the document scores
-                scores = models.score_lmjm(parser.stemSentence(query))
+                scores = models.score_lmd(parser.stemSentence(query))
 
                 # Do the evaluation
                 [average_precision, precision, self.recall, thresholds] = cranfield.eval(scores, i)
@@ -49,15 +49,17 @@ class MAP_lambCalc:
                 map_model = map_model + average_precision
                 i = i + 1
 
+            print('\nMAP = ', map_model / cranfield.num_queries)
+            print('\nnew = ', new)
             self.map_val.append(map_model / cranfield.num_queries)
             index = index + 1
 
-        plt.plot(lambs, self.map_val, color='b', alpha=1)
-        plt.ylim([0.0, 0.5])
-        plt.xlim([0.0, 1.0])
-        plt.xlabel('Lambda')
+        plt.plot(news, self.map_val, color='green', alpha=1)
+        plt.ylim([0.27, 0.30])
+        plt.xlim([0.0, 1500.0])
+        plt.xlabel('New')
         plt.ylabel('MAP')
-        plt.title('MAP-Lambda')
-        plt.savefig('results/map-lamb.png', dpi=100)
+        plt.title('MAP-New')
+        plt.savefig('results/map-new.png', dpi=100)
         plt.show()
 

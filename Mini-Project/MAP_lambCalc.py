@@ -57,6 +57,7 @@ class MAP_lambCalc:
         plt.xlim([0.0, 1.0])
         plt.xlabel('Lambda')
         plt.ylabel('MAP')
+        #plt.title('MAP-Lambda (lambda={0:0.2f})'.format(self.map_model))
         plt.title('MAP-Lambda')
         plt.savefig('results/map-lamb.png', dpi=100)
         plt.show()

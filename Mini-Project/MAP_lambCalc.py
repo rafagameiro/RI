@@ -1,15 +1,12 @@
 import numpy as np
-from sklearn.feature_extraction.text import CountVectorizer
 import matplotlib.pyplot as plt
 import simpleparser as parser
 from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.metrics import precision_recall_curve
-from sklearn.metrics import average_precision_score
 
 import collectionloaders
 import RetrievalModelsMatrix
 
-
+# Computes the MAP throughout a specific range of lambda values
 class MAP_lambCalc:
 
     def __init__(self, bigrams):
@@ -34,6 +31,10 @@ class MAP_lambCalc:
         index = 0
         self.map_val = []
         lambs = np.arange(0, 1, 0.1)
+
+        # For each value in the lambs array it will compute the MAP
+        # After going through all the values in the lambs array
+        # it will present a plot with the variation of the MAP throughout the lamb values
         for lamb in lambs:
             models = RetrievalModelsMatrix.RetrievalModelsMatrix(tf_cranfield, vectorizer, lamb)
 
@@ -57,7 +58,6 @@ class MAP_lambCalc:
         plt.xlim([0.0, 1.0])
         plt.xlabel('Lambda')
         plt.ylabel('MAP')
-        #plt.title('MAP-Lambda (lambda={0:0.2f})'.format(self.map_model))
         plt.title('MAP-Lambda')
         plt.savefig('results/map-lamb.png', dpi=100)
         plt.show()

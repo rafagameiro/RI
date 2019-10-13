@@ -5,7 +5,8 @@ from sklearn.feature_extraction.text import CountVectorizer
 import collectionloaders
 import RetrievalModelsMatrix
 
-
+# Computes the MAP throughout a specific range of alpha values
+# The limit chosen to define the threshold in the RM3 models can also vary
 class MAP_alphaCalc:
 
     def __init__(self, bigrams):
@@ -29,7 +30,9 @@ class MAP_alphaCalc:
 
         colors = ['green', 'red', 'blue']
         limits = [-3, -5, -10]
-        words = []
+
+        # For each defined limit it will compute the MAP variation
+        # given a specific range of alpha values
         for k in limits:
             index = 0
             self.map_val = []
@@ -46,6 +49,7 @@ class MAP_alphaCalc:
                     # Do the evaluation
                     [average_precision, precision, self.recall, thresholds] = cranfield.eval(scores, i)
 
+                    # Compute the words that were considered relevant in this query
                     words = self.show_query_terms(vectorizer, models)
                     print('\nalpha:', alpha, ', limit:', abs(k), '\n', words)
 
@@ -55,6 +59,7 @@ class MAP_alphaCalc:
                 self.map_val.append(map_model / cranfield.num_queries)
                 index = index + 1
 
+            # Creates the plot that will show the MAP variation with the different alpha values
             plt.plot(alphas, self.map_val, color=colors[limits.index(k)], alpha=1,
                      label='limit = ' + str(abs(limits[limits.index(k)])))
 
@@ -67,6 +72,8 @@ class MAP_alphaCalc:
         plt.savefig('results/map-alpha.png', dpi=100)
         plt.show()
 
+    # Goes through vector generated in the RM3 model and checks which positions have values different from zero
+    # Those positions means the word was relevant for the query so its stored in a new array that will be returned
     def show_query_terms(self, vectorizer, models):
         query_vector = models.get_rm3()[0]
         words = []

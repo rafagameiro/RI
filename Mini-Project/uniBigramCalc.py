@@ -6,11 +6,12 @@ from sklearn.feature_extraction.text import CountVectorizer
 import collectionloaders
 import RetrievalModelsMatrix
 
-
+# Computes the Precision-Recall curve with unigrams and bigrams for different models
 class computeUniBi:
 
     def __init__(self, model_type):
 
+        # Names from the models the program can compute
         models_names = ["vsm", "lmd", "lmjm", "rm3"]
         cranfield = collectionloaders.CranfieldTestBed()
 
@@ -21,6 +22,7 @@ class computeUniBi:
 
         for k in range(0, 2):
 
+            # Depending on the k variable the "vectorizer" will use unigrams or bigrams
             if k == 0:
                 vectorizer = CountVectorizer()
             else:
@@ -34,6 +36,7 @@ class computeUniBi:
             self.map_model = 0
             self.precision_model = []
 
+            # Goes through all the queries and computes the MAP and mean value of the precision
             for query in cranfield.queries:
                 scores = self.compute_score(models, model_type, query)
 
@@ -46,6 +49,8 @@ class computeUniBi:
             self.map_model = self.map_model / cranfield.num_queries
             mean_precision = np.mean(self.precision_model, axis=0)
 
+            # Draws in the plot the Precision-Recall relation using the color in the "colors" array at the position k
+            # I will also give a label to that line which is in the labels array at the position k
             plt.plot(self.recall, mean_precision, color=colors[k], alpha=1, label=labels[k])
             plt.gca().set_aspect('equal', adjustable='box')
 
@@ -53,10 +58,14 @@ class computeUniBi:
         plt.ylabel('Precision')
         plt.ylim([0.0, 1.0])
         plt.xlim([0.0, 1.0])
+
+        # Places the legend at the top left corner of the plot
         plt.legend(loc='upper left')
         plt.title('Precision-Recall (' + models_names[model_type].upper() + ')')
         plt.savefig('results/uni-bi-' + models_names[model_type] + '.png', dpi=100)
 
+    # Depending on the value of the variable "type"
+    # the program will execute a different model
     def compute_score(self, models, type, query):
         if type == 0:
             return models.score_vsm(parser.stemSentence(query))
@@ -65,4 +74,4 @@ class computeUniBi:
         elif type == 2:
             return models.score_lmjm(parser.stemSentence(query))
         else:
-            return models.scoreRM3( parser.stemSentence(query))
+            return models.scoreRM3(parser.stemSentence(query))

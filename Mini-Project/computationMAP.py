@@ -1,15 +1,12 @@
 import numpy as np
-from sklearn.feature_extraction.text import CountVectorizer
 import matplotlib.pyplot as plt
 import simpleparser as parser
 from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.metrics import precision_recall_curve
-from sklearn.metrics import average_precision_score
 
 import collectionloaders
 import RetrievalModelsMatrix
 
-
+# Computes the MAP of a specific model with static parameters
 class computeMAP:
 
     def __init__(self, bigrams):
@@ -48,20 +45,24 @@ class computeMAP:
             # Do the evaluation
             [average_precision, precision, self.recall, thresholds] = cranfield.eval(scores, i)
 
-            # Some messages...
+            # If the computed average precision of the query is below a static value (0.05) it will be presented
             if is_sw > average_precision:
                 print('qid =', i, ' AP=', average_precision)
                 self.ap_below = self.ap_below + average_precision
 
+            # Sums all the average_precision values obtained in the different queries
             self.map_model = self.map_model + average_precision
             self.precision_model.append(precision)
             plt.plot(self.recall, precision, color='silver', alpha=0.1)
 
             i = i + 1
 
+        # Computes the mean value of MAP and
+        # the percentage of queries that have an average precision below a static value
         self.map_model = self.map_model / cranfield.num_queries
         self.ap_below = (self.ap_below / cranfield.num_queries) * 100
 
+    # Draws the Precision-Recall curve with the values obtain from the iteration o queries
     def prec_rec_plot(self):
 
         mean_precision = np.mean(self.precision_model, axis=0)
@@ -70,6 +71,8 @@ class computeMAP:
         plt.figure(2)
         plt.plot(self.recall, mean_precision, color='b', alpha=1)
         plt.gca().set_aspect('equal', adjustable='box')
+
+        # Display a space of possible values the MAP can vary
         plt.fill_between(self.recall,
                          mean_precision - std_precision,
                          mean_precision + std_precision, facecolor='b', alpha=0.1)
@@ -80,7 +83,9 @@ class computeMAP:
         plt.xlim([0.0, 1.0])
         plt.title('Precision-Recall (MAP={0:0.2f})'.format(self.map_model))
 
+        # Presents the MAP value and the percentage of queries that have an average precision below a static value
         print('MAP =', self.map_model)
         print('Percentage of AP inferior to 0.05 = ', self.ap_below)
 
+        # Save the drawn plot to a figure
         plt.savefig('results/prec-recall.png', dpi=100)

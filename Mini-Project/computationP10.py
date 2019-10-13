@@ -1,15 +1,12 @@
 import numpy as np
-from sklearn.feature_extraction.text import CountVectorizer
 import matplotlib.pyplot as plt
 import simpleparser as parser
 from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.metrics import precision_recall_curve
-from sklearn.metrics import average_precision_score
 
 import collectionloaders
 import RetrievalModelsMatrix
 
-
+# Computes the P10 of a specific model with static parameters
 class computeP10:
 
     def __init__(self, bigrams):
@@ -37,7 +34,6 @@ class computeP10:
         self.p10_model = 0
         self.precision_model = []
 
-        plt.figure(1)
         for query in cranfield.queries:
             # Parse the query and compute the document scores
             scores = models.score_lmd(parser.stemSentence(query))
@@ -45,11 +41,12 @@ class computeP10:
             # Do the evaluation
             [average_precision, precision, self.recall, p10] = cranfield.eval(scores, i)
 
+            # Sums all the p10 values obtained in the different queries
             self.p10_model = self.p10_model + p10
             self.precision_model.append(precision)
-            plt.plot(self.recall, precision, color='silver', alpha=0.1)
 
             i = i + 1
 
+        # Computes the mean value of P10 and present it
         self.p10_model = self.p10_model / cranfield.num_queries
         print('\nP10 =', self.p10_model)

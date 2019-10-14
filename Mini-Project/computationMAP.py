@@ -9,9 +9,7 @@ import RetrievalModelsMatrix
 # Computes the MAP of a specific model with static parameters
 class computeMAP:
 
-    def __init__(self, bigrams):
-
-        is_sw = 0.05
+    def __init__(self, bigrams, model_type, is_sw=0.05, is_ba=0.95):
 
         ### 1. Load the corpus
         cranfield = collectionloaders.CranfieldTestBed()
@@ -36,19 +34,25 @@ class computeMAP:
         self.map_model = 0
         self.precision_model = []
         self.ap_below = 0
-
+        self.better_query = []
+        self.worse_query = []
+        
         plt.figure(1)
         for query in cranfield.queries:
             # Parse the query and compute the document scores
-            scores = models.score_lmd(parser.stemSentence(query))
+            scores = self.compute_score(models, model_type, query)
 
             # Do the evaluation
             [average_precision, precision, self.recall, thresholds] = cranfield.eval(scores, i)
 
             # If the computed average precision of the query is below a static value (0.05) it will be presented
             if is_sw > average_precision:
-                print('qid =', i, ' AP=', average_precision)
+                #print('qid =', i, ' AP=', average_precision)
                 self.ap_below = self.ap_below + average_precision
+                worse_query.append(i)
+                
+            if is_ba >= average_precision:
+                better_query.append(i)
 
             # Sums all the average_precision values obtained in the different queries
             self.map_model = self.map_model + average_precision
@@ -61,6 +65,15 @@ class computeMAP:
         # the percentage of queries that have an average precision below a static value
         self.map_model = self.map_model / cranfield.num_queries
         self.ap_below = (self.ap_below / cranfield.num_queries) * 100
+        
+        print('model ', model_type, ' done.')
+        print('MAP = ', self.map_model)
+        
+    def get_stats(self):
+        return self.recall, np.mean(self.precision_model, axis=0)
+    
+    def get_queries(self):
+        return self.better_query, self.worse_query
 
     # Draws the Precision-Recall curve with the values obtain from the iteration o queries
     def prec_rec_plot(self):
@@ -89,3 +102,16 @@ class computeMAP:
 
         # Save the drawn plot to a figure
         plt.savefig('results/prec-recall.png', dpi=100)
+        
+        
+    # Depending on the value of the variable "type"
+    # the program will execute a different model
+    def compute_score(self, models, type, query):
+        if type == 0:
+            return models.score_vsm(parser.stemSentence(query))
+        elif type == 1:
+            return models.score_lmd(parser.stemSentence(query))
+        elif type == 2:
+            return models.score_lmjm(parser.stemSentence(query))
+        else:
+            return models.scoreRM3(parser.stemSentence(query), -3, 0.5)

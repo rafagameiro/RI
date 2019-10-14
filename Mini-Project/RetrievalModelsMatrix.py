@@ -40,6 +40,8 @@ class RetrievalModelsMatrix:
 
         # Computes the LMJM matrix according to the given expression
         self.lmjm = lamb * self.ptmd + (1 - lamb) * self.ptmc
+        
+        self.log_lmjm = np.log(self.lmjm)
 
         ## RM3 statistics
         self.prm3 = []
@@ -67,7 +69,7 @@ class RetrievalModelsMatrix:
     def score_lmjm(self, query):
         query_vector = self.vectorizer.transform([query]).toarray()
 
-        doc_scores = np.prod(self.lmjm ** query_vector, axis=1)
+        doc_scores = np.sum(self.lmjm * query_vector, axis=1)
 
         return doc_scores
 
@@ -103,6 +105,8 @@ class RetrievalModelsMatrix:
         # Computes the probability of the relevance model 3 according with the given expression
         self.prm3 = (1 - alpha) * pwmq + alpha * prm1
 
+        self.prm3[self.prm3 < np.mean(self.prm3)] = 0
+        
         # Given the new query vector (RM3) recomputes the score for the documents
         doc_scores = np.prod(self.lmjm ** self.prm3, axis=1)
 

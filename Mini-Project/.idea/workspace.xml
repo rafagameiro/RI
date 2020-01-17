@@ -27,7 +27,7 @@
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="PropertiesComponent">
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../../RI-Mini-Project" />
     <property name="settings.editor.selected.configurable" value="project.propVCSSupport.Mappings" />
   </component>
   <component name="RecentsManager">
@@ -64,6 +64,10 @@
       <workItem from="1570828354005" duration="5651000" />
       <workItem from="1570882015542" duration="18216000" />
       <workItem from="1571000498878" duration="3660000" />
+      <workItem from="1571090567088" duration="80000" />
+      <workItem from="1574202202286" duration="52000" />
+      <workItem from="1574202303163" duration="63000" />
+      <workItem from="1574203597831" duration="152000" />
     </task>
     <servers />
   </component>
